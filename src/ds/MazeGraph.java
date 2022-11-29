@@ -17,8 +17,6 @@ public class MazeGraph
         addAllEdges(sets,vertexes,rows,cols,adjacencyLists);
     }
 
-
-
     public static void addAllEdges(DisjointSets sets, List<Integer> vertexes, int rows, int cols,
                                    LinkedList<Integer>[] adjacent)
     {
@@ -149,5 +147,10 @@ public class MazeGraph
         }
 
         return rand;
+    }
+
+    public LinkedList<Integer>[] getAdjacencyLists()
+    {
+        return adjacencyLists;
     }
 }
