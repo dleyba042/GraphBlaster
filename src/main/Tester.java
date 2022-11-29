@@ -13,13 +13,12 @@ public class Tester extends Application
 {
 
     Stage window;
-    private static final int WINDOW_PADDING = 20;
+    private static final int WINDOW_DEFAULT_WIDTH = 750;
     public static void main(String[] args)
     {
         launch(args);
         //Looks like we only have to do a good union up to the last one
         //probably because once we've gotten to it, it has no valid options left
-
     }
 
     @Override
@@ -27,17 +26,22 @@ public class Tester extends Application
     {
         //Create original graph
 
-        int rows = 50;
-        int cols = 50;
+        //TODO yep the math formula has to be a height that is evenly divisible by both row and column
+        //and you just add 40 to it to represent the padding!!
+        //for this one I did 44 * 17 = 748(The even divisor) + 40 = 788
+
+        int rows = 350;
+        int cols = 350;
 
         MazeGraph graph = new MazeGraph(4,4);
 
-        int idealWidth =  ((rows * 10) % 800 > 0) ? 800 : 600;
-        int idealHeight = ((rows * 10) % 800 > 0) ? 800 : 600;
+        int idealDimensions =  findIdealDim(rows);
+        int padding = (WINDOW_DEFAULT_WIDTH- idealDimensions) / 2; //to be able to keep the main window pretty big
+        idealDimensions+= (padding * 2);
 
         window = primaryStage;
         window.setTitle("Devin's Badass Graph");
-        window.setScene(fromGrid(graph,rows,cols, idealHeight,idealWidth));
+        window.setScene(fromGrid(graph,rows,cols, idealDimensions,idealDimensions , padding));
         window.show();
     }
 
@@ -57,39 +61,15 @@ public class Tester extends Application
     }
 
 
-    public static Scene fromGrid(MazeGraph graph,int rows, int cols, int height, int width)
+    public static Scene fromGrid(MazeGraph graph,int rows, int cols, int height, int width, int padding)
     {
         GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(WINDOW_PADDING,WINDOW_PADDING,WINDOW_PADDING,WINDOW_PADDING));
+        gridPane.setPadding(new Insets(padding,padding,padding,padding));
         gridPane.setVgap(0);
         gridPane.setHgap(0);
 
-        /*
-        //TODO may be usefull later
-        int widthCol = (width - (WINDOW_PADDING * 2)) / cols;
-        int heightRow = (height - (WINDOW_PADDING * 2) - HEIGHT_ADJUSTER) / rows;
-        int bottomRow = heightRow * (rows - 1);
-
-         */
-
-       // System.out.println("Width = " + widthCol);
-       // System.out.println("Height = " + heightRow);
-
-        /*
-        //fill in the rest
-        for(int x = leftCol ; x<width-heightRow; x+= widthCol)
-        {
-            for(int y = 0; y<height-heightRow - HEIGHT_ADJUSTER; y+= heightRow)
-            {
-                gridPane.getChildren().addAll(drawGrid(x, y,leftCol,bottomRow, widthCol,heightRow));
-            }
-
-        }
-
-         */
-
-        int wholeRowWidth = width - (WINDOW_PADDING * 2) - 20;
-        int wholeColHeight = height - (WINDOW_PADDING * 2) -20 ;
+        int wholeRowWidth = width - (padding* 2) ;
+        int wholeColHeight = height - (padding * 2) ;
         int widthCol = wholeRowWidth / cols ;
         int heightRow = wholeColHeight / rows;
 
@@ -166,7 +146,20 @@ public class Tester extends Application
             gridPane.getChildren().addAll(new MyLine(0, y ,wholeRowWidth,y,0,y,false));
             counter++;
         }
-        gridPane.getChildren().addAll(new MyLine(0, wholeColHeight,0,wholeColHeight,wholeRowWidth,wholeColHeight,false));
+    }
+
+    public static int findIdealDim(int rowsCols)
+    {
+        int startDim = 700;
+
+
+        while (startDim % rowsCols != 0)
+        {
+            startDim--;
+        }
+        System.out.println(startDim);
+
+        return startDim ;//+ 40;
     }
 
 }
