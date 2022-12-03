@@ -6,6 +6,7 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
@@ -24,6 +25,13 @@ public class Tester extends Application
     public static final int START_DIM_OF_WINDOW = 660;
     private static final int WINDOW_DEFAULT_WIDTH = 750;
     private static final int START_DIMS_OF_GRAPH = 12;
+
+    private static final List<ColumnConstraints> constraints = initColumnConstraints();
+
+    private static final Button DFS_BUTTON = initDFS();
+
+    private static final Button BFS_BUTTON = initBFS();
+
     private static final ComboBox<Integer> COMBO_BOX = initComboBox();
     private static final Button BUTTON = initButton();
 
@@ -60,6 +68,10 @@ public class Tester extends Application
 
          GridPane maze = new GridPane();
          maze.setPadding(new Insets(padding,padding,padding,padding));
+         maze.addColumn(3);
+         maze.addColumn(4);
+         maze.addColumn(5);
+         maze.getColumnConstraints().addAll(constraints);
 
         int wholeRowWidth = width - (padding* 2) ;
         int wholeColHeight = height - (padding * 2) ;
@@ -70,6 +82,8 @@ public class Tester extends Application
         createMaze(graph,wholeColHeight,heightRow,wholeRowWidth,widthCol,dims,maze);
 
         maze.add(BUTTON,0,2);
+        maze.add(DFS_BUTTON,3,2);
+        maze.add(BFS_BUTTON,4,2);
         maze.add(COMBO_BOX,1,2);
 
         return new Scene(maze,width,height);
@@ -220,6 +234,40 @@ public class Tester extends Application
         return fromGrid(new MazeGraph(dims,dims),dims
                 ,idealDim,idealDim,startVals.get("padding"));
 
+    }
+
+    public static List<ColumnConstraints> initColumnConstraints()
+    {
+        ColumnConstraints col1 = new ColumnConstraints();
+        col1.setPercentWidth(25);
+        ColumnConstraints col2 = new ColumnConstraints();
+        col2.setPercentWidth(15);
+        ColumnConstraints col3 = new ColumnConstraints();
+        col3.setPercentWidth(20);
+        ColumnConstraints col4 = new ColumnConstraints();
+        col4.setPercentWidth(20);
+        ColumnConstraints col5 = new ColumnConstraints();
+        col4.setPercentWidth(20);
+
+        return List.of(col1,col2,col3,col4,col5);
+    }
+
+    public static Button initDFS()
+    {
+        Button button = new Button();
+        button.setPadding(new Insets(10,10,10,10));
+        button.setText("DFS??");
+        button.setAlignment(Pos.BASELINE_LEFT);
+        return button;
+    }
+
+    public static Button initBFS()
+    {
+        Button button = new Button();
+        button.setPadding(new Insets(10,10,10,10));
+        button.setText("BFS??");
+        button.setAlignment(Pos.BASELINE_LEFT);
+        return button;
     }
 }
 
