@@ -13,6 +13,7 @@ import javafx.scene.layout.*;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,12 +22,9 @@ public class Tester extends Application
 
     public static final int MAX_CHOICES = 300;
     public static final int START_DIM_OF_WINDOW = 660;
-    Stage window;
     private static final int WINDOW_DEFAULT_WIDTH = 750;
     private static final int START_DIMS_OF_GRAPH = 12;
-
     private static final ComboBox<Integer> COMBO_BOX = initComboBox();
-
     private static final Button BUTTON = initButton();
 
     public static void main(String[] args)
@@ -37,44 +35,44 @@ public class Tester extends Application
     @Override
     public void start(Stage primaryStage)
     {
-        primaryStage.setTitle("Devin's Badass Graph");
-        initWindow(START_DIMS_OF_GRAPH,primaryStage);
+        primaryStage.setTitle("Devin's Badass Maze");
+
+        BUTTON.setOnAction( (ActionEvent event) ->
+        {
+          //  BASE_PANE.getChildren().clear();
+            if(COMBO_BOX.getValue() == null)
+            {
+                primaryStage.setScene(setupScene(START_DIMS_OF_GRAPH));
+            }
+            else
+            {
+                primaryStage.setScene(setupScene(COMBO_BOX.getValue()));
+            }
+
+        });
+
+        primaryStage.setScene(setupScene(START_DIMS_OF_GRAPH));
         primaryStage.show();
     }
 
-    public static Scene fromGrid(MazeGraph graph,int dims, int height, int width, int padding, Stage primaryStage)
+    public static Scene fromGrid(MazeGraph graph,int dims, int height, int width, int padding)
     {
-        GridPane gridPane = new GridPane();
-        gridPane.setPadding(new Insets(padding,padding,padding,padding));
-        gridPane.setVgap(0);
-        gridPane.setHgap(0);
+
+         GridPane maze = new GridPane();
+         maze.setPadding(new Insets(padding,padding,padding,padding));
 
         int wholeRowWidth = width - (padding* 2) ;
         int wholeColHeight = height - (padding * 2) ;
         int widthCol = wholeRowWidth / dims ;
         int heightRow = wholeColHeight / dims;
 
-        drawGrid(wholeRowWidth,wholeColHeight ,widthCol,heightRow,gridPane,dims);
-        createMaze(graph,wholeColHeight,heightRow,wholeRowWidth,widthCol,dims,gridPane);
+        drawGrid(wholeRowWidth,wholeColHeight ,widthCol,heightRow,dims,maze);
+        createMaze(graph,wholeColHeight,heightRow,wholeRowWidth,widthCol,dims,maze);
 
-        BUTTON.setOnAction( (ActionEvent event) ->
-                {
-                    if(COMBO_BOX.getValue() == null)
-                    {
-                        primaryStage.setScene(fromGrid(new MazeGraph(dims, dims),dims, height,width, padding
-                                ,primaryStage));
-                    }
-                    else
-                    {
-                        initWindow(COMBO_BOX.getValue(),primaryStage);
-                    }
+        maze.add(BUTTON,0,2);
+        maze.add(COMBO_BOX,1,2);
 
-                });
-        gridPane.add(BUTTON,0,2);
-        gridPane.add(COMBO_BOX,1,2);
-
-        return new Scene(gridPane,width,height);
-
+        return new Scene(maze,width,height);
     }
 
 
@@ -85,36 +83,35 @@ public class Tester extends Application
      */
 
     public static void knockDownWalls(boolean left, boolean right, boolean top, boolean bottom,
-                                      double translateX, double translateY, GridPane graph, int wallWidth, int wallHeight)
+                                      double translateX, double translateY, int wallWidth, int wallHeight, GridPane maze)
     {
         if(top)
         {
-            graph.getChildren().add(makeLineFromBuilder(0,0,wallWidth,0,translateX,translateY,true));
+            maze.getChildren().add(makeLineFromBuilder(0,0,wallWidth,0,translateX,translateY,true));
         }
 
         if(bottom)
         {
-            graph.getChildren().add(makeLineFromBuilder(0,0,wallWidth,0,translateX,translateY + wallHeight,true));
+            maze.getChildren().add(makeLineFromBuilder(0,0,wallWidth,0,translateX,translateY + wallHeight,true));
         }
         if(left)
         {
-            graph.getChildren().add(makeLineFromBuilder(0,0,0,wallHeight,translateX,translateY,true));
+            maze.getChildren().add(makeLineFromBuilder(0,0,0,wallHeight,translateX,translateY,true));
         }
         if(right)
         {
-            graph.getChildren().add(makeLineFromBuilder(0,0,0,wallHeight,translateX + wallWidth,translateY,true));
+            maze.getChildren().add(makeLineFromBuilder(0,0,0,wallHeight,translateX + wallWidth,translateY,true));
         }
     }
 
-    public static void drawGrid(int wholeRowWidth, int wholeColHeight,int widthCol, int heightRow,
-                                GridPane gridPane, int numRows)
+    public static void drawGrid(int wholeRowWidth, int wholeColHeight,int widthCol, int heightRow, int numRows, GridPane maze)
     {
         int counter = 0;
 
         for(int x = 0, y=0 ; numRows >= counter; x+= widthCol, y+= heightRow)
         {
-            gridPane.getChildren().addAll(makeLineFromBuilder(x,0,x,wholeColHeight,x,0,false));
-            gridPane.getChildren().addAll(makeLineFromBuilder(0, y ,wholeRowWidth,y,0,y,false));
+            maze.getChildren().addAll(makeLineFromBuilder(x,0,x,wholeColHeight,x,0,false));
+            maze.getChildren().addAll(makeLineFromBuilder(0, y ,wholeRowWidth,y,0,y,false));
             counter++;
         }
     }
@@ -149,13 +146,16 @@ public class Tester extends Application
                 .build();
     }
 
-    public static void initWindow(int dim, Stage primaryStage)
+    public static HashMap<String,Integer> initWindow(int dim)
     {
+        HashMap<String,Integer> map = new HashMap<>();
         int idealDimensions =  findIdealDim(dim);
         int padding = (WINDOW_DEFAULT_WIDTH- idealDimensions) / 2; //to be able to keep the main window pretty big
+        map.put("dim",dim);
+        map.put("padding",padding);
         idealDimensions+= (padding * 2);
-        primaryStage.setScene(fromGrid(new MazeGraph(dim,dim),dim,idealDimensions,idealDimensions , padding,
-                primaryStage));
+        map.put("idealDim",idealDimensions);
+        return map;
     }
 
     /**
@@ -166,11 +166,10 @@ public class Tester extends Application
      * @param wholeRowWidth
      * @param widthCol
      * @param dims
-     * @param gridPane
      */
 
     public static void createMaze(MazeGraph graph, int wholeColHeight, int heightRow,int wholeRowWidth, int widthCol,
-                                  int dims, GridPane gridPane)
+                                  int dims, GridPane maze)
     {
         int mazeParser = 0;
 
@@ -184,7 +183,7 @@ public class Tester extends Application
                         adjacencyLists[mazeParser].contains(mazeParser + 1),
                         adjacencyLists[mazeParser].contains(mazeParser - dims),
                         adjacencyLists[mazeParser].contains(mazeParser + dims),
-                        x, y,gridPane,widthCol,heightRow);
+                        x, y,widthCol,heightRow,maze);
 
                 mazeParser++;
             }
@@ -213,5 +212,14 @@ public class Tester extends Application
         return button;
     }
 
+    public static Scene setupScene(int dims)
+    {
+        HashMap<String,Integer> startVals = initWindow(dims);
+        int idealDim = startVals.get("idealDim");
+
+        return fromGrid(new MazeGraph(dims,dims),dims
+                ,idealDim,idealDim,startVals.get("padding"));
+
+    }
 }
 
