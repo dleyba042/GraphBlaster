@@ -3,6 +3,7 @@ package experiments;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
@@ -26,7 +27,7 @@ public class Experimental
         return new Scene(root, 400,400);
     }
 
-    public static class MyNode extends StackPane
+    public static class MyNode extends GridPane
     {
         public MyNode(double x, double y, double width, double height)
         {

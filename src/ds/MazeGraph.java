@@ -1,9 +1,6 @@
 package ds;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 public class MazeGraph
 {
@@ -152,5 +149,69 @@ public class MazeGraph
     public LinkedList<Integer>[] getAdjacencyLists()
     {
         return adjacencyLists;
+    }
+
+    //TODO figure out why this gets out of order??!!!
+    public List<Integer> dfs()
+    {
+        int endNode = adjacencyLists.length-1;
+        int countAdded = 0;
+        Set<Integer> seen = new HashSet<>();
+        Set<Integer> shouldAdd = new HashSet<>();
+        Stack<Integer> traversalSoFar = new Stack<>();
+        Stack<Integer> traverserStack = new Stack<>();
+        List<Integer> returnList = new LinkedList<>();
+
+        traverserStack.add(0);
+        seen.add(0);
+
+        while(!traverserStack.isEmpty())
+        {
+            int current = traverserStack.pop();
+
+            if(current == endNode)
+            {
+                returnList.add(endNode);
+                while(!traversalSoFar.isEmpty())
+                {
+                    returnList.add(traversalSoFar.pop());
+                }
+                return returnList;
+            }
+
+            List<Integer> neighbors = adjacencyLists[current];
+
+            for(int neighbor : neighbors)
+            {
+                if(!shouldAdd.contains(neighbor))
+                {
+                    shouldAdd.add(neighbor);
+                    traverserStack.add(neighbor);
+                    countAdded++;
+                }
+            }
+            //we hit a wall remove all the crappy ones
+            if(countAdded == 0)
+            {
+                int nextInLine = traverserStack.peek();
+                    while (!traversalSoFar.isEmpty() && !validNeighbors(adjacencyLists[traversalSoFar.peek()], nextInLine))
+                    {
+                        traversalSoFar.pop();
+                    }
+
+            }else
+            {
+                seen.add(current);
+                traversalSoFar.add(current); //Then this one is good as far as we know;
+            }
+            countAdded = 0;
+        }
+        //DEFAULT RETURN THIS SHOULD NEVER BE HIT
+        return returnList;
+    }
+
+    public boolean validNeighbors(List<Integer> currentlst, int nextInLine)
+    {
+        return currentlst.contains(nextInLine);
     }
 }

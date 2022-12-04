@@ -1,6 +1,7 @@
 package main;
 
 import ds.MazeGraph;
+import experiments.Experimental;
 import gui.MyLine;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -20,7 +21,14 @@ import static gui.Utilities.*;
 public class Tester extends Application
 {
 
-    private static final int START_DIMS_OF_GRAPH = 12;
+    //TODO bad practice research why this is happening
+
+    private static final int START_DIMS_OF_GRAPH = 2;
+
+    private static final double SQUARE_MARGIN_ADJUSTER = .1;
+
+    private static final double SQUARE_WIDTH_ADJUSTER = .8;
+
 
     private static final List<ColumnConstraints> CONSTRAINTS = initColumnConstraints();
 
@@ -41,6 +49,7 @@ public class Tester extends Application
     {
         primaryStage.setTitle("Devin's Badass Maze");
 
+        //TODO how bout for every element in traversal we just color that square using math!!!
         BUTTON.setOnAction( (ActionEvent event) ->
         {
             if(COMBO_BOX.getValue() == null)
@@ -74,7 +83,17 @@ public class Tester extends Application
         int heightRow = wholeColHeight / dims;
 
         drawGrid(wholeRowWidth,wholeColHeight ,widthCol,heightRow,dims,maze);
+        //These gotta be divided by TWO to be properly adjusting
         createMaze(graph,wholeColHeight,heightRow,wholeRowWidth,widthCol,dims,maze);
+
+        //TEST DFS HERE
+        DFS_BUTTON.setOnAction( (ActionEvent event) ->
+        {
+            for(int cord : graph.dfs())
+            {
+                colorSquare(cord,widthCol,dims,maze);
+            }
+        });
 
         maze.add(BUTTON,0,2);
         maze.add(DFS_BUTTON,3,2);
@@ -111,6 +130,7 @@ public class Tester extends Application
         {
             maze.getChildren().add(makeLineFromBuilder(0,0,0,wallHeight,translateX + wallWidth,translateY,true));
         }
+
     }
 
     public static void drawGrid(int wholeRowWidth, int wholeColHeight,int widthCol, int heightRow, int numRows, GridPane maze)
@@ -157,13 +177,13 @@ public class Tester extends Application
                                   int dims, GridPane maze)
     {
         int mazeParser = 0;
-
         LinkedList<Integer>[] adjacencyLists = graph.getAdjacencyLists();
 
         for(int y = 0 ; y< wholeColHeight && mazeParser<adjacencyLists.length; y+= heightRow)
         {
             for(int x = 0; x< wholeRowWidth && mazeParser<adjacencyLists.length; x+= widthCol)
             {
+
                 knockDownWalls(adjacencyLists[mazeParser].contains(mazeParser - 1),
                         adjacencyLists[mazeParser].contains(mazeParser + 1),
                         adjacencyLists[mazeParser].contains(mazeParser - dims),
@@ -183,6 +203,20 @@ public class Tester extends Application
         return fromGrid(new MazeGraph(dims,dims),dims
                 ,idealDim,idealDim,startVals.get("padding"));
 
+    }
+
+    public static void colorSquare(int vertex, int colWidth, int dimensions, GridPane maze)
+    {
+
+        int margin = (int)(colWidth * SQUARE_MARGIN_ADJUSTER);
+        int widths = (int)(colWidth * SQUARE_WIDTH_ADJUSTER);
+        int row = vertex / dimensions;
+        int col = vertex % dimensions;
+        int xVal = (col > 0) ? (colWidth * col) + margin :margin;
+        int yVal = (row > 0) ? (colWidth *  row) + margin : margin;
+
+        Experimental.MyNode node = new Experimental.MyNode(xVal,yVal, widths, widths);
+        maze.getChildren().add(node);
     }
 
 }
