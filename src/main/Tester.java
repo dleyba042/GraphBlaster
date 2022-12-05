@@ -29,7 +29,6 @@ public class Tester extends Application
 
     private static final double SQUARE_WIDTH_ADJUSTER = .8;
 
-
     private static final List<ColumnConstraints> CONSTRAINTS = initColumnConstraints();
 
     private static final Button DFS_BUTTON = initDFS();
@@ -54,20 +53,21 @@ public class Tester extends Application
         {
             if(COMBO_BOX.getValue() == null)
             {
-                primaryStage.setScene(setupScene(START_DIMS_OF_GRAPH));
+                primaryStage.setScene(setupScene(START_DIMS_OF_GRAPH,primaryStage));
             }
             else
             {
-                primaryStage.setScene(setupScene(COMBO_BOX.getValue()));
+                primaryStage.setScene(setupScene(COMBO_BOX.getValue(),primaryStage));
             }
 
         });
 
-        primaryStage.setScene(setupScene(START_DIMS_OF_GRAPH));
+        primaryStage.setScene(setupScene(START_DIMS_OF_GRAPH,primaryStage));
         primaryStage.show();
     }
 
-    public static Scene fromGrid(MazeGraph graph,int dims, int height, int width, int padding)
+    public static Scene fromGrid(MazeGraph graph,int dims, int height, int width, int padding, Stage stage,
+                                 boolean dfs, boolean bfs)
     {
 
          GridPane maze = new GridPane();
@@ -83,17 +83,20 @@ public class Tester extends Application
         int heightRow = wholeColHeight / dims;
 
         drawGrid(wholeRowWidth,wholeColHeight ,widthCol,heightRow,dims,maze);
-        //These gotta be divided by TWO to be properly adjusting
         createMaze(graph,wholeColHeight,heightRow,wholeRowWidth,widthCol,dims,maze);
 
-        //TEST DFS HERE
-        DFS_BUTTON.setOnAction( (ActionEvent event) ->
+        if(dfs)
         {
             for(int cord : graph.dfs())
-            {
-                colorSquare(cord,widthCol,dims,maze);
-            }
-        });
+                {
+                    colorSquare(cord,widthCol,dims,maze);
+                }
+        }
+
+        //TODO the 'solution' was just to redraw with the dfs for some reason I think
+        //drawing in the way I  adds a new layer that occludes he buttons ??
+        DFS_BUTTON.setOnAction( (ActionEvent event) -> stage.setScene(setWithGraph(graph,dims,stage,true,false)
+        ));
 
         maze.add(BUTTON,0,2);
         maze.add(DFS_BUTTON,3,2);
@@ -102,7 +105,6 @@ public class Tester extends Application
 
         return new Scene(maze,width,height);
     }
-
 
     /**
      * Weird thing about the translateY for the sides of the square is that it seems to start in the middle and
@@ -195,13 +197,22 @@ public class Tester extends Application
         }
     }
 
-    public static Scene setupScene(int dims)
+    public static Scene setupScene(int dims, Stage stage)
     {
         HashMap<String,Integer> startVals = initWindow(dims);
         int idealDim = startVals.get("idealDim");
 
-        return fromGrid(new MazeGraph(dims,dims),dims
-                ,idealDim,idealDim,startVals.get("padding"));
+        return fromGrid(new MazeGraph(dims,dims),dims,idealDim,idealDim,startVals.get("padding"), stage,false,false);
+
+    }
+
+    public static Scene setWithGraph(MazeGraph graph, int dims, Stage stage, boolean dfs, boolean bfs)
+    {
+        HashMap<String,Integer> startVals = initWindow(dims);
+        int idealDim = startVals.get("idealDim");
+
+        return fromGrid(graph,dims
+                ,idealDim,idealDim,startVals.get("padding"),stage,true,false);
 
     }
 
